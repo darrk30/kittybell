@@ -1,0 +1,77 @@
+<?php
+
+namespace App\Observers;
+
+use App\Models\Product;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
+class ProductObserver
+{
+
+    /**
+     * Handle the Product "creating" event.
+     */
+    public function creating(Product $product): void
+    {
+        if (empty($product->slug)) {
+            $product->slug = Str::slug($product->name);
+        }
+    }
+
+    /**
+     * Handle the Product "updating" event.
+     */
+    public function updating(Product $product): void
+    {
+        if (empty($product->slug)) {
+            $product->slug = Str::slug($product->name);
+        }
+
+                // Verifica si la imagen cambió
+        if ($product->isDirty('image')) {
+            $old = $product->getOriginal('image');
+            if ($old) {
+                Storage::disk('public')->delete($old);
+            }
+        }
+    }
+    /**
+     * Handle the Product "created" event.
+     */
+    public function created(Product $product): void {}
+
+    /**
+     * Handle the Product "updated" event.
+     */
+    public function updated(Product $product): void
+    {
+        //
+    }
+
+    /**
+     * Handle the Product "deleted" event.
+     */
+    public function deleted(Product $product): void
+    {
+        if ($product->image) {
+            Storage::disk('public')->delete($product->image);
+        }
+    }
+
+    /**
+     * Handle the Product "restored" event.
+     */
+    public function restored(Product $product): void
+    {
+        //
+    }
+
+    /**
+     * Handle the Product "force deleted" event.
+     */
+    public function forceDeleted(Product $product): void
+    {
+        //
+    }
+}
